@@ -139,7 +139,7 @@ def cepstrum(input, nceps):
     return dct(input, type=2, axis=1, norm = 'ortho')[:,: nceps]
 
 
-def minAccD(accD, i, j):
+def minAD(accD, i, j):
     if(i == 0 and j == 0):
         return 0
     elif (i == 0):
@@ -171,15 +171,48 @@ def dtw(x, y, dist):
     """
     N = x.shape[0]
     M = y.shape[0]
-    locD = np.zeros((N, M))
+    LD = np.zeros((N, M))
     for i in range(N):
         for j in range(M):
-            locD[i,j] = dist(x[i] - y[j])
-    plt.pcolormesh(locD)
-    plt.show()
-    accD = np.zeros((N, M))
+            LD[i,j] = dist(x[i] - y[j])
+    #plt.pcolormesh(locD)
+    #plt.show()
+    AD = np.zeros((N, M))
     for i in range(N):
         for j in range(M):
-            accD[i,j] = locD[i, j] + minAccD(accD, i, j)
-    plt.pcolormesh(accD)
-    plt.show()
+            AD[i,j] = LD[i, j] + minAD(AD, i, j)
+    d = AD[N - 1, M - 1] / (N + M)
+    path = backtrack(AD)
+    #plt.pcolormesh(accD)
+    #plt.show()
+    return d, LD, AD, path
+
+def backtrack(AD):
+    """
+    Returns best path through accumulated distance matrix AD
+    """
+    N = AD.shape[0]
+    M = AD.shape[1]
+    path = [(N - 1, M - 1)]
+    i = N - 1
+    j = M - 1
+    while(i > 0 or j > 0):
+        if( i > 0 and j > 0):
+            argmin = np.argmin([AD[i - 1, j - 1], AD[i - 1, j], AD[i, j - 1]])
+            if(argmin == 0):
+                path.append((i - 1, j - 1))
+                i = i - 1
+                j = j - 1
+            elif(argmin == 1):
+                path.append((i - 1, j))
+                i = i - 1
+            elif(argmin == 2):
+                path.append((i, j - 1))
+                j = j - 1
+        elif(i == 0 and j > 0):
+            path.append((0, j - 1))
+            j = j - 1
+        else:
+            path.append((i - 1, 0))
+            i = i - 1
+    return path
