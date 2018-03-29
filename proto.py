@@ -138,6 +138,21 @@ def cepstrum(input, nceps):
     """
     return dct(input, type=2, axis=1, norm = 'ortho')[:,: nceps]
 
+
+def minAccD(accD, i, j):
+    if(i == 0 and j == 0):
+        return 0
+    elif (i == 0):
+        return accD[i, j - 1]
+    elif (j == 0):
+        return accD[i - 1, j]
+    minimum = accD[i - 1, j]
+    if(accD[i - 1, j - 1] < minimum):
+        minimum = accD[i - 1, j - 1]
+    if(accD[i, j - 1] < minimum):
+        minimum = accD[i, j - 1]
+    return minimum
+
 def dtw(x, y, dist):
     """Dynamic Time Warping.
 
@@ -154,3 +169,17 @@ def dtw(x, y, dist):
 
     Note that you only need to define the first output for this exercise.
     """
+    N = x.shape[0]
+    M = y.shape[0]
+    locD = np.zeros((N, M))
+    for i in range(N):
+        for j in range(M):
+            locD[i,j] = dist(x[i] - y[j])
+    plt.pcolormesh(locD)
+    plt.show()
+    accD = np.zeros((N, M))
+    for i in range(N):
+        for j in range(M):
+            accD[i,j] = locD[i, j] + minAccD(accD, i, j)
+    plt.pcolormesh(accD)
+    plt.show()
