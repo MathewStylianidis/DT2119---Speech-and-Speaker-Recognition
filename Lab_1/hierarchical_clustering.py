@@ -8,5 +8,6 @@ labels = getLabels(dataset)
 
 D = np.load('./data/global_distance_matrix.npy')
 linkage_matrix = linkage(D, method = 'complete')
-dendrogram(linkage_matrix, labels = labels)
+plt.xticks(rotation=90)
+dendrogram(linkage_matrix, labels = labels, orientation = 'right')
 plt.show()

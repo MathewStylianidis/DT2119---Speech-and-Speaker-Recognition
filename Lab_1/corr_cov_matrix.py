@@ -1,6 +1,6 @@
 from proto import *
 
-signal_features = np.load("./data/lmfcc_utterance_features.npz")['arr_0']
+signal_features = np.load("./data/mspec_utterance_features.npz")['arr_0']
 
 # Stack features on top of each other
 feature_matrix = signal_features[0]
