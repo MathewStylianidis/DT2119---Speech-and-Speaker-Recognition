@@ -33,14 +33,14 @@ def concatHMMs(hmmmodels, namelist):
     combinedHMM['transmat'] = np.zeros((M + 1, M + 1))
     combinedHMM['means'] = np.zeros((M, D))
     combinedHMM['covars'] = np.zeros((M, D))
-    combinedHMM['startprob'] = np.zeros((1, M + 1))
+    combinedHMM['startprob'] = np.zeros((M + 1, 1))
     step = N - 1
     for idx, name in enumerate(namelist):
         if(idx == 0):
-            combinedHMM['startprob'][:,idx*step:idx*step + step + 1] = \
-                        hmmmodels[name]['startprob'].reshape(1, -1)
+            combinedHMM['startprob'][idx*step:idx*step + step + 1] = \
+                        hmmmodels[name]['startprob'].reshape(-1, 1)
         else:
-            combinedHMM['startprob'][:,idx*step:idx*step + step + 1] = np.zeros((1, N))
+            combinedHMM['startprob'][idx*step:idx*step + step + 1] = np.zeros((N, 1))
         combinedHMM['transmat'][idx*step:idx*step + step + 1, idx*step:idx*step + step + 1] += hmmmodels[name]['transmat']
 
         combinedHMM['means'][idx*step:idx*step + step] += hmmmodels[name]['means']
@@ -49,6 +49,44 @@ def concatHMMs(hmmmodels, namelist):
     return combinedHMM
 
 
+def concatHMMs2(hmmmodels, namelist):
+    """ Concatenates HMM models in a left to right manner
+
+    Args:
+       hmmmodels: list of dictionaries with the following keys:
+           name: phonetic or word symbol corresponding to the model
+           startprob: M+1 array with priori probability of state
+           transmat: (M+1)x(M+1) transition matrix
+           means: MxD array of mean vectors
+           covars: MxD array of variances
+       namelist: list of model names that we want to concatenate
+
+    D is the dimension of the feature vectors
+    M is the number of states in each HMM model (could be different for each)
+
+    Output
+       combinedhmm: dictionary with the same keys as the input but
+                    combined models
+
+    Example:
+       wordHMMs['o'] = concatHMMs(phoneHMMs, ['sil', 'ow', 'sil'])
+    """
+    combinedhmm = {}
+    combinedhmm['name'] = ''.join(namelist)
+    combinedhmm['startprob'] = np.zeros(len(namelist) * 3)
+    combinedhmm['startprob'][0:4] = hmmmodels[namelist[0]]['startprob']
+    combinedhmm['transmat'] = np.zeros([len(namelist) * 3 + 1, len(namelist) * 3 + 1])
+    for i, name in enumerate(namelist):
+        combinedhmm['transmat'][i * 3:i * 3 + 4, i * 3:i * 3 + 4] = hmmmodels[name]['transmat']
+        if i == 0:
+            combinedhmm['means'] = hmmmodels[name]['means']
+            combinedhmm['covars'] = hmmmodels[name]['covars']
+        else:
+            combinedhmm['means'] = np.concatenate([combinedhmm['means'], hmmmodels[name]['means']])
+            combinedhmm['covars'] = np.concatenate([combinedhmm['covars'], hmmmodels[name]['covars']])
+    combinedhmm['startprob'] = np.expand_dims(combinedhmm['startprob'], axis=1)
+    combinedhmm['transmat'] = combinedhmm['transmat'][:-1, :-1]
+    return combinedhmm
 
 
 
@@ -78,11 +116,14 @@ def forward(log_emlik, log_startprob, log_transmat):
         forward_prob: NxM array of forward log probabilities for each of the M states in the model
     """
     alpha = np.zeros(log_emlik.shape)
-    alpha[0][:] = log_startprob[:,:-1] + log_emlik[0]
+    alpha[0][:] = log_startprob.T + log_emlik[0]
+
     for n in range(1,len(alpha)):
-        for i in range(alpha.shape[1] - 1):
-            alpha[n,i] = logsumexp(alpha[n - 1] + log_transmat[:-1,i]) +  log_emlik[n,i]
+        for i in range(alpha.shape[1]):
+            alpha[n, i] = logsumexp(alpha[n - 1] + log_transmat[:,i]) + log_emlik[n,i]
     return alpha
+
+
 
 
 def backward(log_emlik, log_startprob, log_transmat):
@@ -98,10 +139,11 @@ def backward(log_emlik, log_startprob, log_transmat):
     """
 
     log_b = np.zeros(log_emlik.shape)
-    for n in range(log_b.shape[0] - 2, 0, -1):
-        for i in range(log_b.shape[1]):
-            log_b[n][i] = logsumexp(log_transmat[i,:-1].reshape(-1, 1) + log_emlik[n + 1, i] + log_b[n + 1,:].reshape(-1, 1))
+    for n in reversed(range(log_emlik.shape[0] - 1)):
+        for i in range(log_emlik.shape[1]):
+            log_b[n, i] = logsumexp(log_transmat[i,:] + log_emlik[n + 1, :] + log_b[n + 1,:])
     return log_b
+
 
 def viterbi(log_emlik, log_startprob, log_transmat):
     """Viterbi path.
@@ -115,6 +157,13 @@ def viterbi(log_emlik, log_startprob, log_transmat):
         viterbi_loglik: log likelihood of the best path
         viterbi_path: best path
     """
+    viterbi_loglik = log_startprob + log_emlik[0]
+    viterbi_path = []
+
+    for n in range(1, log_emlik.shape[0]):
+        viterbi_loglik = np.max(viterbi_loglik + log_transmat) + log_emlik[n]
+        viterbi_path.append(np.argmax(viterbi_loglik))
+    return viterbi_loglik[-1], viterbi_path
 
 def statePosteriors(log_alpha, log_beta):
     """State posterior (gamma) probabilities in log domain.
