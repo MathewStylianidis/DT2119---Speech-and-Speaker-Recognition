@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.linalg import block_diag
 from tools2 import *
 
 def concatHMMs(hmmmodels, namelist):
@@ -23,6 +24,32 @@ def concatHMMs(hmmmodels, namelist):
     Example:
        wordHMMs['o'] = concatHMMs(phoneHMMs, ['sil', 'ow', 'sil'])
     """
+    combinedHMM = {}
+    modelCount = len(namelist)
+    N = hmmmodels[namelist[0]]['transmat'].shape[0]
+    M = (modelCount) * (N - 1)
+    D = hmmmodels[namelist[0]]['means'].shape[1]
+    combinedHMM['name'] = ' '.join(namelist)
+    combinedHMM['transmat'] = np.zeros((M + 1, M + 1))
+    combinedHMM['means'] = np.zeros((M, D))
+    combinedHMM['covars'] = np.zeros((M, D))
+    combinedHMM['startprob'] = np.zeros((1, M + 1))
+    step = N - 1
+    for idx, name in enumerate(namelist):
+        if(idx == 0):
+            combinedHMM['startprob'][:,idx*step:idx*step + step + 1] = \
+                        hmmmodels[name]['startprob'].reshape(1, -1)
+        else:
+            combinedHMM['startprob'][:,idx*step:idx*step + step + 1] = np.zeros((1, N))
+        combinedHMM['transmat'][idx*step:idx*step + step + 1, idx*step:idx*step + step + 1] += hmmmodels[name]['transmat']
+
+        combinedHMM['means'][idx*step:idx*step + step] += hmmmodels[name]['means']
+        combinedHMM['covars'][idx*step:idx*step + step] += hmmmodels[name]['covars']
+    combinedHMM['transmat'][-1, -1] = 1.0
+    return combinedHMM
+
+
+
 
 
 def gmmloglik(log_emlik, weights):
@@ -38,6 +65,7 @@ def gmmloglik(log_emlik, weights):
         gmmloglik: scalar, log likelihood of data given the GMM model.
     """
 
+
 def forward(log_emlik, log_startprob, log_transmat):
     """Forward (alpha) probabilities in log domain.
 
@@ -49,6 +77,13 @@ def forward(log_emlik, log_startprob, log_transmat):
     Output:
         forward_prob: NxM array of forward log probabilities for each of the M states in the model
     """
+    alpha = np.zeros(log_emlik.shape)
+    alpha[0][:] = log_startprob[:,:-1] + log_emlik[0]
+    for n in range(1,len(alpha)):
+        for i in range(alpha.shape[1] - 1):
+            alpha[n,i] = logsumexp(alpha[n - 1] + log_transmat[:-1,i]) +  log_emlik[n,i]
+    return alpha
+
 
 def backward(log_emlik, log_startprob, log_transmat):
     """Backward (beta) probabilities in log domain.
@@ -61,6 +96,12 @@ def backward(log_emlik, log_startprob, log_transmat):
     Output:
         backward_prob: NxM array of backward log probabilities for each of the M states in the model
     """
+
+    log_b = np.zeros(log_emlik.shape)
+    for n in range(log_b.shape[0] - 2, 0, -1):
+        for i in range(log_b.shape[1]):
+            log_b[n][i] = logsumexp(log_transmat[i,:-1].reshape(-1, 1) + log_emlik[n + 1, i] + log_b[n + 1,:].reshape(-1, 1))
+    return log_b
 
 def viterbi(log_emlik, log_startprob, log_transmat):
     """Viterbi path.
