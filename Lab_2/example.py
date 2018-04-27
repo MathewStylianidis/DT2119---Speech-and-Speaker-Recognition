@@ -56,17 +56,21 @@ print("DESIRED LOG PROBABILITY OF OBSERVATION SEQUENCE: " + str(example['loglik'
 backward_probs = backward(obsloglik, np.log(pi), np.log(A))
 makePlots(backward_probs.T, example['logbeta'].T)
 
+# Get viterbi results
 viterbi_loglik, viterbi_path = viterbi(example['obsloglik'], np.log(pi), np.log(A))
 plt.pcolormesh(np.ma.masked_invalid(forward_probs.T))
 plt.plot(viterbi_path)
 plt.show()
-
-
-#makePlots(backward_probs.T, example['logbeta'].T)
 print(viterbi_loglik)
 print(example['vloglik'][0])
 print(viterbi_path)
 print(example['vloglik'][1])
+
+# Calculate state posteriors gamma
+gamma = statePosteriors(forward_probs, backward_probs)
+makePlots(gamma.T, example['loggamma'].T)
+print(np.sum(np.exp((gamma)), axis = 1))
+
 
 '''
 
