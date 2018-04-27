@@ -67,14 +67,11 @@ print(viterbi_path)
 print(example['vloglik'][1])
 
 # Calculate state posteriors gamma
-gamma = statePosteriors(forward_probs, backward_probs)
+gamma = statePosteriors(example['logalpha'], example['logbeta'])
 makePlots(gamma.T, example['loggamma'].T)
-print(np.sum(np.exp((gamma)), axis = 1))
-
-
-'''
-
-print(example['logalpha'][5])
-print(forward_probs[5])
-
-'''
+# Print sum of probs in axis = 1 which should sum up to 1
+print(np.sum(np.exp(gamma), axis = 1))
+# Print sum of probs in axis = 0 --- Shows which states are most probable across the sequence
+print(np.sum(np.exp(gamma), axis = 0))
+# Sum probs across both states and timesteps -- You get the number of timesteps (DUUH, sensible since each column sums up to 1)
+print(np.sum(np.exp(gamma)))
