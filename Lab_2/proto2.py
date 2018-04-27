@@ -138,12 +138,29 @@ def backward(log_emlik, log_startprob, log_transmat):
         backward_prob: NxM array of backward log probabilities for each of the M states in the model
     """
 
-    log_b = np.zeros(log_emlik.shape)
+    log_b = np.zeros(log_emlik.shape)# + 1.0 / log_emlik.shape[1]
     for n in reversed(range(log_emlik.shape[0] - 1)):
         for i in range(log_emlik.shape[1]):
             log_b[n, i] = logsumexp(log_transmat[i,:] + log_emlik[n + 1, :] + log_b[n + 1,:])
     return log_b
 
+
+def viterbiBacktrack(B, lastIdx):
+    """Does backtracking retrieving the viterbi path given the most probable
+        previous indices in each timestep.
+
+    Args:
+        B: NxM array where N are the timesteps and M are the states and each
+            element contains the most probable state in the previous timestep.
+        lastIdx: index of the most probable state in timestep N
+    Returns:
+        A vector of N-1 elements with the viterbi path
+    """
+    viterbi_path = [lastIdx]
+    for i in reversed(range(1, B.shape[0])):
+        viterbi_path.append(B[i, viterbi_path[-1]])
+    viterbi_path.reverse()
+    return np.array(viterbi_path)
 
 def viterbi(log_emlik, log_startprob, log_transmat):
     """Viterbi path.
@@ -157,13 +174,20 @@ def viterbi(log_emlik, log_startprob, log_transmat):
         viterbi_loglik: log likelihood of the best path
         viterbi_path: best path
     """
-    viterbi_loglik = log_startprob + log_emlik[0]
-    viterbi_path = []
+    B = np.zeros(log_emlik.shape, dtype = int)
+    V = np.zeros(log_emlik.shape)
+    V[0] = log_startprob.flatten() + log_emlik[0]
 
     for n in range(1, log_emlik.shape[0]):
-        viterbi_loglik = np.max(viterbi_loglik + log_transmat) + log_emlik[n]
-        viterbi_path.append(np.argmax(viterbi_loglik))
-    return viterbi_loglik[-1], viterbi_path
+        for j in range(log_emlik.shape[1]):
+            V[n][j] = np.max(V[n - 1,:] + log_transmat[:,j]) + log_emlik[n, j]
+            B[n][j] = np.argmax(V[n - 1,:] + log_transmat[:,j])
+
+    # Backtrack to take viteri path
+    viterbi_path = viterbiBacktrack(B, np.argmax(V[ log_emlik.shape[0] - 1]))
+
+    return np.max(V[ log_emlik.shape[0] - 1]), viterbi_path
+
 
 def statePosteriors(log_alpha, log_beta):
     """State posterior (gamma) probabilities in log domain.

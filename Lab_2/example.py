@@ -43,18 +43,19 @@ pi = HMM['startprob'][:-1]
 obsloglik = log_mv(data[0]['lmfcc'], HMM['means'], HMM['covars'])
 forward_probs = forward(example['obsloglik'], np.log(pi), np.log(A))
 backward_probs = backward(example['obsloglik'], np.log(pi), np.log(A))
+viterbi_loglik, viterbi_path = viterbi(example['obsloglik'], np.log(pi), np.log(A))
 
-makePlots(obsloglik.T, example['obsloglik'].T)
-makePlots(forward_probs.T, example['logalpha'].T)
-makePlots(backward_probs.T, example['logbeta'].T)
-
+#makePlots(obsloglik.T, example['obsloglik'].T)
+#makePlots(forward_probs.T, example['logalpha'].T)
+#makePlots(backward_probs.T, example['logbeta'].T)
+print(viterbi_loglik)
+print(example['vloglik'][0])
+print(viterbi_path)
+print(example['vloglik'][1])
 
 '''
-viterbi_loglik, viterbi_path = viterbi(example['obsloglik'], np.log(pi), np.log(A))
+
 print(example['logalpha'][5])
 print(forward_probs[5])
-#print(viterbi_loglik)
-#print(example['vloglik'][0])
-#print(len(viterbi_path))
-#print(len(example['vloglik'][1]))
+
 '''
