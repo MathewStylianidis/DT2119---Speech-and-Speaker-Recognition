@@ -37,16 +37,31 @@ phoneHMMs = np.load('lab2_models.npz')['phoneHMMs'].item()
 for key in prondict.keys():
     prondict[key] = ['sil'] + prondict[key] + ['sil']
 
+
 HMM = concatHMMs(phoneHMMs, prondict['o'])
 A = HMM['transmat'][:-1,:-1]
 pi = HMM['startprob'][:-1]
-obsloglik = log_mv(data[0]['lmfcc'], HMM['means'], HMM['covars'])
-forward_probs = forward(example['obsloglik'], np.log(pi), np.log(A))
-backward_probs = backward(example['obsloglik'], np.log(pi), np.log(A))
-viterbi_loglik, viterbi_path = viterbi(example['obsloglik'], np.log(pi), np.log(A))
 
-#makePlots(obsloglik.T, example['obsloglik'].T)
-#makePlots(forward_probs.T, example['logalpha'].T)
+# Get log-likelihood for each observation in the utterance 'o'
+obsloglik = log_mv(data[22]['lmfcc'], HMM['means'], HMM['covars'])
+makePlots(obsloglik.T, example['obsloglik'].T)
+
+# Get forward probabilities
+forward_probs, obs_seq_log_prob = forward(obsloglik, np.log(pi), np.log(A))
+makePlots(forward_probs.T, example['logalpha'].T)
+print("LOG PROBABILITY OF OBSERVATION SEQUENCE: " + str(obs_seq_log_prob))
+print("DESIRED LOG PROBABILITY OF OBSERVATION SEQUENCE: " + str(example['loglik']))
+
+# Get backward probabilities
+backward_probs = backward(obsloglik, np.log(pi), np.log(A))
+makePlots(backward_probs.T, example['logbeta'].T)
+
+viterbi_loglik, viterbi_path = viterbi(example['obsloglik'], np.log(pi), np.log(A))
+plt.pcolormesh(np.ma.masked_invalid(forward_probs.T))
+plt.plot(viterbi_path)
+plt.show()
+
+
 #makePlots(backward_probs.T, example['logbeta'].T)
 print(viterbi_loglik)
 print(example['vloglik'][0])
