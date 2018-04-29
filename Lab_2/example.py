@@ -1,8 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import sys
+import warnings
 from proto2 import *
 from sklearn.mixture import log_multivariate_normal_density as log_mv
+
+
+
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
 
 def makePlots(normal, example):
    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.005, hspace=0.005)
@@ -57,7 +64,7 @@ backward_probs = backward(obsloglik, np.log(pi), np.log(A))
 makePlots(backward_probs.T, example['logbeta'].T)
 
 # Get viterbi results
-viterbi_loglik, viterbi_path = viterbi(example['obsloglik'], np.log(pi), np.log(A))
+viterbi_loglik, viterbi_path = viterbi(obsloglik, np.log(pi), np.log(A))
 plt.pcolormesh(np.ma.masked_invalid(forward_probs.T))
 plt.plot(viterbi_path)
 plt.show()
@@ -67,7 +74,7 @@ print(viterbi_path)
 print(example['vloglik'][1])
 
 # Calculate state posteriors gamma
-gamma = statePosteriors(example['logalpha'], example['logbeta'])
+gamma = statePosteriors(forward_probs, backward_probs)
 makePlots(gamma.T, example['loggamma'].T)
 # Print sum of probs in axis = 1 which should sum up to 1
 print(np.sum(np.exp(gamma), axis = 1))
@@ -75,3 +82,7 @@ print(np.sum(np.exp(gamma), axis = 1))
 print(np.sum(np.exp(gamma), axis = 0))
 # Sum probs across both states and timesteps -- You get the number of timesteps (DUUH, sensible since each column sums up to 1)
 print(np.sum(np.exp(gamma)))
+
+
+# Estimate mean and cov based on state posteriors and data
+means, covars = updateMeanAndVar(obsloglik, gamma)

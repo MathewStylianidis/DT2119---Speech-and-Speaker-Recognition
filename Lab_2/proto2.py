@@ -1,14 +1,7 @@
 import numpy as np
-import sys
-import warnings
 from scipy.linalg import block_diag
 from tools2 import *
-
-
-
-
-if not sys.warnoptions:
-    warnings.simplefilter("ignore")
+from sklearn.mixture import log_multivariate_normal_density as log_mv
 
 
 def concatHMMs(hmmmodels, namelist):
@@ -188,3 +181,47 @@ def updateMeanAndVar(X, log_gamma, varianceFloor=5.0):
          means: MxD mean vectors for each state
          covars: MxD covariance (variance) vectors for each state
     """
+
+    gamma = np.exp(log_gamma)
+    means = np.zeros((log_gamma.shape[1], X.shape[1]))
+    covars = np.zeros(means.shape)
+
+    for i in range(means.shape[0]):
+        gamma_sum = np.sum(gamma[:,i])
+        means[i] = np.sum(gamma[:,i].reshape(-1, 1) * X, axis = 0) / gamma_sum
+        covars[i] = np.sum(gamma[:,i].reshape(-1, 1) * (X - means[i])**2, axis = 0) / gamma_sum
+    return (means, covars)
+
+def BaumWelch(X, HMM, max_iter = 40, tol = 1):
+    """Trains the HMM given the data with a BaumWelch operating in the log domain.
+        Keeps the prior probability and transition matrix constant and learns
+        the mean and variance of each state for each emission.
+
+    Args:
+        X: NxM array with the observation log likelihoods where N are the time-
+        steps and M are the number of states.
+        HMM: the model with the pre-initialized parameters.
+        max_iter: maximum number of training iterations
+        tol: small floating value that determines what is considered as an
+            insignificant change in the likelihood.
+
+    Returns:
+        The HMM model trained on X.
+    """
+    prev_likelihood = None
+
+    for i in range(max_iter):
+        obsloglik = log_mv(X, HMM['means'], HMM['covars'])
+        forward_probs, obs_seq_log_prob = forward(obsloglik, np.log(HMM['startprob']), np.log(HMM['transmat']))
+        # Check for convergence
+        #print(obs_seq_log_prob)
+        if(prev_likelihood is not None and not(np.abs(obs_seq_log_prob - prev_likelihood) > tol)):
+            break
+        prev_likelihood = obs_seq_log_prob
+        # Get beta and gamma values
+        backward_probs = backward(obsloglik, np.log(HMM['startprob']), np.log(HMM['transmat']))
+        gamma = statePosteriors(forward_probs, backward_probs)
+        # Update the means and covars
+        HMM['means'], HMM['covars'] = updateMeanAndVar(X, gamma)
+    print("TRAINING FINISHED - LOG LIKELIHOOD OF SEQUENCE: " + str(prev_likelihood))
+    return HMM
