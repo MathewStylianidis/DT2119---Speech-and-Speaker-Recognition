@@ -190,6 +190,7 @@ def updateMeanAndVar(X, log_gamma, varianceFloor=5.0):
         gamma_sum = np.sum(gamma[:,i])
         means[i] = np.sum(gamma[:,i].reshape(-1, 1) * X, axis = 0) / gamma_sum
         covars[i] = np.sum(gamma[:,i].reshape(-1, 1) * (X - means[i])**2, axis = 0) / gamma_sum
+        covars[i, covars[i] < varianceFloor] = varianceFloor
     return (means, covars)
 
 def BaumWelch(X, HMM, max_iter = 40, tol = 1):
@@ -214,7 +215,7 @@ def BaumWelch(X, HMM, max_iter = 40, tol = 1):
         obsloglik = log_mv(X, HMM['means'], HMM['covars'])
         forward_probs, obs_seq_log_prob = forward(obsloglik, np.log(HMM['startprob']), np.log(HMM['transmat']))
         # Check for convergence
-        #print(obs_seq_log_prob)
+        print(obs_seq_log_prob)
         if(prev_likelihood is not None and not(np.abs(obs_seq_log_prob - prev_likelihood) > tol)):
             break
         prev_likelihood = obs_seq_log_prob
