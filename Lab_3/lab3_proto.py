@@ -12,6 +12,9 @@ def words2phones(wordList, pronDict, addSilence=True, addShortPause=False):
     Output:
        list of phone symbols
     """
+    phoneTrans = ['sil']
+    #do convertion
+    phoneTrans.append('sil')
 
 def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
     """ forcedAlignmen: aligns a phonetic transcription at the state level
@@ -27,7 +30,7 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
        list of strings in the form phoneme_index specifying, for each time step
        the state from phoneHMMs corresponding to the viterbi path.
     """
-    
+
 
 def hmmLoop(hmmmodels, namelist=None):
     """ Combines HMM models in a loop
