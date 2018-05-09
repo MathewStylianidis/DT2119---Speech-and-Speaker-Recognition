@@ -61,5 +61,3 @@ def frames2trans(sequence, outfilename=None, timestep=0.01):
         with open(outfilename, 'w') as f:
             f.write(trans)
     return trans
-
-        

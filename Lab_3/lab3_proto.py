@@ -27,6 +27,7 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans):
        list of strings in the form phoneme_index specifying, for each time step
        the state from phoneHMMs corresponding to the viterbi path.
     """
+    
 
 def hmmLoop(hmmmodels, namelist=None):
     """ Combines HMM models in a loop
