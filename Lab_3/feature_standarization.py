@@ -1,4 +1,5 @@
 import numpy as np
+<<<<<<< HEAD
 from sklearn import preprocessing
 
 training_data = np.load("Lab3_files/training_data.npy")
@@ -49,3 +50,9 @@ print(X_val.shape)
 
 #np.save("X_train.npy", X_train)
 #np.save("X_val.npy", X_val)
+=======
+
+
+training_data = np.load("Lab3_files/training_data.npy")
+validation_data = np.load("Lab3_files/validation_data.npy")
+>>>>>>> e19d015d1020544d6b79fe276ad57c396011d08c
