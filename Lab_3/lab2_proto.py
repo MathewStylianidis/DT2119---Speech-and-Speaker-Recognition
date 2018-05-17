@@ -43,7 +43,9 @@ def concatHMMs(hmmmodels, namelist):
                         hmmmodels[name]['startprob'].reshape(-1, 1)
         else:
             combinedHMM['startprob'][idx*step:idx*step + step + 1] = np.zeros((N, 1))
+
         combinedHMM['transmat'][idx*step:idx*step + step + 1, idx*step:idx*step + step + 1] += hmmmodels[name]['transmat']
+        combinedHMM['transmat'][idx*step + step, idx*step + step] = 0
 
         combinedHMM['means'][idx*step:idx*step + step] += hmmmodels[name]['means']
         combinedHMM['covars'][idx*step:idx*step + step] += hmmmodels[name]['covars']
@@ -131,6 +133,7 @@ def viterbi(log_emlik, log_startprob, log_transmat):
         log_emlik: NxM array of emission log likelihoods, N frames, M states
         log_startprob: log probability to start in state i
         log_transmat: transition log probability from state i to j
+
 
     Output:
         viterbi_loglik: log likelihood of the best path

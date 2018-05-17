@@ -1,11 +1,10 @@
 import numpy as np
 import argparse
-
 #import os
 #import sys
-from Spinner import *
 
-DEFAULT_HMM_MODELS_PATH= "../Lab_2/lab2_models.npz"
+
+DEFAULT_HMM_MODELS_PATH= "../Lab_2/lab2_models_v2.npz"
 DEFAULT_STATE_LIST_PATH = "Lab3_files/state_list.npy"
 
 def get_arguments():
@@ -39,15 +38,6 @@ stateList = [ph + '_' + str(id) for ph in phones for id in range(nstates[ph])]
 print("State list created...\n")
 
 
-
 print("Saving state list...")
 np.save(args.state_list_path, stateList)
 print("State list completed.")
-
-
-
-
-
-
-
-#
