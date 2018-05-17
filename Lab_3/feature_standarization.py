@@ -1,5 +1,4 @@
 import numpy as np
-<<<<<<< HEAD
 from sklearn import preprocessing
 
 training_data = np.load("Lab3_files/training_data.npy")
@@ -48,9 +47,9 @@ print(X_train.shape)
 print(X_val.shape)
 
 
-#np.save("X_train.npy", X_train)
-#np.save("X_val.npy", X_val)
-=======
+np.save("X_train.npy", X_train)
+np.save("X_val.npy", X_val)
+
 
 
 training_data = np.load("Lab3_files/training_data.npy")
