@@ -3,6 +3,7 @@ from sklearn import preprocessing
 
 training_data = np.load("Lab3_files/d_training_data.npy")
 validation_data = np.load("Lab3_files/d_validation_data.npy")
+state_list = list(np.load( "Lab3_files/state_list.npy"))
 
 N = 0
 D = np.prod(np.array(training_data[0]['dynamic_features']).shape[1:3])
@@ -18,7 +19,7 @@ for sample in training_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
     X_train[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
-    y_val[prev:idx:prev_idx + n] = np.array(sample['targets'])
+    y_val[prev:idx:prev_idx + n] = sample['targets']
     prev_idx += n
 
 
@@ -34,7 +35,7 @@ for sample in validation_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
     X_val[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
-    y_val[prev:idx:prev_idx + n] = np.array(sample['targets'])
+    y_val[prev:idx:prev_idx + n] = sample['targets']
     prev_idx += n
 
 

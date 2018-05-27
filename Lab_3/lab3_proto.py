@@ -83,7 +83,7 @@ def concatAnyHMM(hmmModels, nameList):
 
 
 
-def forcedAlignment(lmfcc, phoneHMMs, phoneTrans, state_list, addShortPause = False):
+def forcedAlignment(lmfcc, phoneHMMs, phoneTrans, state_list, filename = None, addShortPause = False):
     """ forcedAlignmen: aligns a phonetic transcription at the state level
 
     Args:
@@ -118,9 +118,12 @@ def forcedAlignment(lmfcc, phoneHMMs, phoneTrans, state_list, addShortPause = Fa
 
     # Convert frame by frame sequence of symbols into standard format transcription
     symbol_sequence = [stateTrans[i] for i in viterbi_path]
-    transcription = frames2trans(symbol_sequence, 'z43a.lab')
-    #return symbol_sequence
-    return transcription
+
+    if filename is not None:
+        transcription = frames2trans(symbol_sequence, filename)
+
+    return symbol_sequence
+
 
 
 def hmmLoop(hmmmodels, namelist=None):
