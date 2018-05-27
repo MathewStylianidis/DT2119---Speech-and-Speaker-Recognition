@@ -19,7 +19,7 @@ for sample in training_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
     X_train[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
-    y_val[prev:idx:prev_idx + n] = sample['targets']
+    y_train[prev_idx:prev_idx + n, 0] = sample['targets']
     prev_idx += n
 
 
@@ -35,7 +35,7 @@ for sample in validation_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
     X_val[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
-    y_val[prev:idx:prev_idx + n] = sample['targets']
+    y_val[prev:idx:prev_idx + n, 0] = sample['targets']
     prev_idx += n
 
 

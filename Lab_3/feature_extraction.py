@@ -51,7 +51,7 @@ def feature_extraction(dataset_path, save_path, phoneHMMs, state_list, add_short
                 targets = forcedAlignment(lmfcc, phoneHMMs, phoneTrans, state_list, addShortPause = add_short_pause)
                 target_indices =  np.array([state_list.index(target) for target in targets])
                 traindata.append({'filename': filename, 'lmfcc': lmfcc,
-                    'mspec': 'mspec', 'targets': targets})
+                    'mspec': 'mspec', 'targets': target_indices})
     np.savez(save_path + 'traindata.npz', traindata=traindata)
 
 args = get_arguments()
