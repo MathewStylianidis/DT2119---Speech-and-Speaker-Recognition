@@ -43,16 +43,3 @@ for sample in tqdm(validation_data):
 
 np.save("Lab3_files/d_training_data.npy", training_data)
 np.save("Lab3_files/d_validation_data.npy", validation_data)
-
-
-
-
-
-
-
-
-
-
-
-
-

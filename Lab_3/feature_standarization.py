@@ -12,11 +12,13 @@ for sample in training_data:
 
 
 X_train = np.zeros((N, D))
+y_train = np.zeros((N, 1))
 prev_idx = 0
 for sample in training_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
     X_train[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
+    y_val[prev:idx:prev_idx + n] = np.array(sample['targets'])
     prev_idx += n
 
 
@@ -26,11 +28,13 @@ for sample in validation_data:
     N += np.array(sample['dynamic_features']).shape[0]
 
 X_val = np.zeros((N, D))
+y_val = np.zeros((N, 1))
 prev_idx = 0
 for sample in validation_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
     X_val[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
+    y_val[prev:idx:prev_idx + n] = np.array(sample['targets'])
     prev_idx += n
 
 
@@ -48,5 +52,8 @@ print(X_train.shape)
 print(X_val.shape)
 
 
-np.save("X_train.npy", X_train)
-np.save("X_val.npy", X_val)
+np.save("Lab3_files/X_train.npy", X_train)
+np.save("Lab3_files/X_val.npy", X_val)
+
+np.save("Lab3_files/y_val.npy", y_train)
+np.save("Lab3_files/y_train.npy", y_val)
