@@ -69,5 +69,5 @@ model.compile(optimizer='adam',
 history = model.fit(X_train, y_train, epochs=100, batch_size=256, \
             validation_data = (X_val, y_val), verbose = 1)
 
-with open('/trainHistoryDict', 'wb') as file_pi:
+with open("/trainHistoryDict_" + str(args.hidden_layer_no), 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
