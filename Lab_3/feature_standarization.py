@@ -8,7 +8,7 @@ N = 0
 D = np.prod(np.array(training_data[0]['dynamic_features']).shape[1:3])
 for sample in training_data:
     N += sample['dynamic_features'].shape[0]
-    
+
 
 
 X_train = np.zeros((N, D))
@@ -50,8 +50,3 @@ print(X_val.shape)
 
 np.save("X_train.npy", X_train)
 np.save("X_val.npy", X_val)
-
-
-
-training_data = np.load("Lab3_files/training_data.npy")
-validation_data = np.load("Lab3_files/validation_data.npy")
