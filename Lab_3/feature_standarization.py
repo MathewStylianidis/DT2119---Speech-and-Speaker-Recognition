@@ -1,21 +1,22 @@
 import numpy as np
 from sklearn import preprocessing
 
-training_data = np.load("Lab3_files/training_data.npy")
-validation_data = np.load("Lab3_files/validation_data.npy")
+training_data = np.load("Lab3_files/d_training_data.npy")
+validation_data = np.load("Lab3_files/d_validation_data.npy")
 
 N = 0
-D = np.array(training_data[0]['dynamic_features']).shape[1]
+D = np.prod(np.array(training_data[0]['dynamic_features']).shape[1:3])
 for sample in training_data:
     N += sample['dynamic_features'].shape[0]
-    print(sample['dynamic_features'].shape)
+    
+
 
 X_train = np.zeros((N, D))
 prev_idx = 0
 for sample in training_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
-    X_train[prev_idx:prev_idx + n] = dynamic_features
+    X_train[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
     prev_idx += n
 
 
@@ -29,7 +30,7 @@ prev_idx = 0
 for sample in validation_data:
     dynamic_features = np.array(sample['dynamic_features'])
     n = dynamic_features.shape[0]
-    X_val[prev_idx:prev_idx + n] = dynamic_features
+    X_val[prev_idx:prev_idx + n] = dynamic_features.reshape((n, D))
     prev_idx += n
 
 
@@ -54,4 +55,3 @@ np.save("X_val.npy", X_val)
 
 training_data = np.load("Lab3_files/training_data.npy")
 validation_data = np.load("Lab3_files/validation_data.npy")
->>>>>>> e19d015d1020544d6b79fe276ad57c396011d08c

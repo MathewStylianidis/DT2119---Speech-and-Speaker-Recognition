@@ -23,15 +23,6 @@ for sample in tqdm(training_data):
         dynamic_feature_list.append(dynamic_feature)
     sample['dynamic_features'] = np.array(dynamic_feature_list)
 
-        dynamic_feature = sample['lmfcc'][np.abs(idx - 3)]
-        dynamic_feature = sample['lmfcc'][np.abs(idx - 2)]
-        dynamic_feature = sample['lmfcc'][np.abs(idx - 1)]
-        dynamic_feature = sample['lmfcc'][idx]
-        dynamic_feature = sample['lmfcc'][max_idx - np.abs(max_idx - (idx + 1))]
-        dynamic_feature = sample['lmfcc'][max_idx - np.abs(max_idx - (idx + 2))]
-        dynamic_feature = sample['lmfcc'][max_idx - np.abs(max_idx - (idx + 3))]
-        dynamic_feature_list.append(dynamic_feature)
-    sample['dynamic_features'] = list(dynamic_feature_list)
 
 
 for sample in tqdm(validation_data):
@@ -53,15 +44,15 @@ for sample in tqdm(validation_data):
 np.save("Lab3_files/d_training_data.npy", training_data)
 np.save("Lab3_files/d_validation_data.npy", validation_data)
 
-        dynamic_feature = sample['lmfcc'][np.abs(idx - 3)]
-        dynamic_feature = sample['lmfcc'][np.abs(idx - 2)]
-        dynamic_feature = sample['lmfcc'][np.abs(idx - 1)]
-        dynamic_feature = sample['lmfcc'][idx]
-        dynamic_feature = sample['lmfcc'][max_idx - np.abs(max_idx - (idx + 1))]
-        dynamic_feature = sample['lmfcc'][max_idx - np.abs(max_idx - (idx + 2))]
-        dynamic_feature = sample['lmfcc'][max_idx - np.abs(max_idx - (idx + 3))]
-        dynamic_feature_list.append(dynamic_feature)
-    sample['dynamic_features'] = list(dynamic_feature_list)
 
-np.save("Lab3_files/training_data.npy", training_data)
-np.save("Lab3_files/validation_data.npy", validation_data)
+
+
+
+
+
+
+
+
+
+
+
