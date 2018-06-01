@@ -24,7 +24,7 @@ def get_arguments():
       A list of parsed arguments.
     """
     parser = argparse.ArgumentParser(description="Phoneme recognition.")
-    parser.add_argument("--hidden-layer-no", type=str, default = DEFAULT_HIDDEN_LAYER_NO,
+    parser.add_argument("--hidden-layer-no", type=int, default = DEFAULT_HIDDEN_LAYER_NO,
                         help="Number of hidden layers.")
     parser.add_argument("--X-train-path", type=str, default = DEFAULT_X_TRAIN_PATH,
                         help="Training input data path.")
@@ -68,8 +68,8 @@ model.compile(optimizer='adam',
 
 
 # Train the model
-history = model.fit(X_train, y_train, epochs=100, batch_size=256, \
+history = model.fit(X_train, y_train, epochs=25, batch_size=256, \
             validation_data = (X_val, y_val), verbose = 1)
 
-with open("/trainHistoryDict_" + str(args.hidden_layer_no), 'wb') as file_pi:
+with open("Lab3_files/trainHistoryDict_" + str(args.hidden_layer_no), 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
