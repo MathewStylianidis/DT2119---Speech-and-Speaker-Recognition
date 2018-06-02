@@ -40,6 +40,7 @@ for sample in tqdm(training_data):
         dynamic_feature_list.append(dynamic_feature)
     sample['dynamic_features'] = np.array(dynamic_feature_list)
 
+np.save("Lab3_files/d_training_data.npy", training_data)
 
 
 for sample in tqdm(validation_data):
@@ -58,5 +59,4 @@ for sample in tqdm(validation_data):
         dynamic_feature_list.append(dynamic_feature)
     sample['dynamic_features'] = np.array(dynamic_feature_list)
 
-np.save("Lab3_files/d_training_data.npy", training_data)
 np.save("Lab3_files/d_validation_data.npy", validation_data)
