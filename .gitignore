@@ -2,4 +2,5 @@ Lab_3/pysndfile-1.1.0
 Lab_3/Lab3_files/train*
 Lab_3/Lab3_files/validation*
 Lab_3/env
+Lab_3/Lab3_files/*
 __init__.py

@@ -31,6 +31,7 @@ def get_arguments():
                         help="Path to the npy filek with the state list")
     parser.add_argument("--hmm-models-path", type=str, default=DEFAULT_HMM_MODELS_PATH,
                         help="Path to the npz file containing the hmm models for" \
+                             + " each utterance.")
     parser.add_argument("--save-name", type=str, default=DEFAULT_SAVING_NAME,
                         help="File name of the npz file to save the extracted features.")
     return parser.parse_args()
