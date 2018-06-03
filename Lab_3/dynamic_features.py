@@ -38,7 +38,7 @@ for sample in tqdm(training_data):
         dynamic_feature[5] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 2))]
         dynamic_feature[6] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 3))]
         dynamic_feature_list.append(dynamic_feature)
-    sample['dynamic_features'] = np.array(dynamic_feature_list)
+    sample['features'] = np.array(dynamic_feature_list)
 
 np.save("Lab3_files/d_training_data.npy", training_data)
 
@@ -57,6 +57,6 @@ for sample in tqdm(validation_data):
         dynamic_feature[5] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 2))]
         dynamic_feature[6] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 3))]
         dynamic_feature_list.append(dynamic_feature)
-    sample['dynamic_features'] = np.array(dynamic_feature_list)
+    sample['features'] = np.array(dynamic_feature_list)
 
 np.save("Lab3_files/d_validation_data.npy", validation_data)

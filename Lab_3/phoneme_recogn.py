@@ -51,7 +51,9 @@ output_dim = len(stateList)
 y_train = np_utils.to_categorical(y_train, output_dim)
 y_val = np_utils.to_categorical(y_val, output_dim)
 
-# TODO: Define input dimension
+
+
+
 input_dim = X_train.shape[1]
 
 # Define the deep neural network
