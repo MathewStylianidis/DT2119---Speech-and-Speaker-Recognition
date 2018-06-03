@@ -18,11 +18,11 @@ def get_arguments():
       A list of parsed arguments.
     """
     parser = argparse.ArgumentParser(description="Phoneme recognition.")
-    parser.add_argument("--train-path", type=int, default = DEFAULT_TRAIN_PATH,
+    parser.add_argument("--train-path", type=str, default = DEFAULT_TRAIN_PATH,
                         help="Training input data path.")
     parser.add_argument("--val-path", type=str, default = DEFAULT_VAL_PATH,
                         help="Validation input data path.")
-    parser.add_argument("--val-path", type=str, default=DEFAULT_TEST_PATH,
+    parser.add_argument("--test-path", type=str, default=DEFAULT_TEST_PATH,
                         help="Test input data path.")
     parser.add_argument("--state-list-path", type=str, default = DEFAULT_STATE_LIST_PATH,
                         help="Training labels data path..")
@@ -71,9 +71,9 @@ for sample in validation_data:
     prev_idx += n
 
 # Load test dataset
-test_data = np.load(args.val_path)
+test_data = np.load(args.test_path)
 N = 0
-for sample in validation_data:
+for sample in test_data:
     N += np.array(sample['features']).shape[0]
 
 X_test = np.zeros((N, D))
