@@ -16,6 +16,7 @@ DEFAULT_TEST_INPUTS_PATH = "Lab3_files/X_test.npy"
 DEFAULT_TEST_OUTPUTS_PATH = "Lab3_files/y_test.npy"
 DEFAULT_SAVED_MODEL_PATH =  "Lab3_files/my_model.h5"
 DEFAULT_STATE_LIST_PATH = "Lab3_files/state_list.npy"
+DEFAULT_PHONEME_LIST_PATH = "Lab3_files/phoneme_list.npy"
 DEFAULT_DYNAMIC = True
 
 def get_arguments():
@@ -34,7 +35,9 @@ def get_arguments():
     parser.add_argument("--keras-model-path", type=str, default=DEFAULT_SAVED_MODEL_PATH,
                         help="Saved model path.")
     parser.add_argument("--state-list-path", type=str, default=DEFAULT_STATE_LIST_PATH,
-                        help="Path to the npy filek with the state list")
+                        help="Path to the npy file with the state list")
+    parser.add_argument("--phoneme-list-path", type=str, default=DEFAULT_PHONEME_LIST_PATH,
+                        help="Path to the npy file with the phoneme list")
     return parser.parse_args()
 
 def plot_confusion_matrix(cm, classes,
@@ -88,15 +91,31 @@ predictions = model.predict(X_test)
 ground_truths = np.argmax(y_test, axis = 1)
 predicted_classes = np.argmax(predictions, axis = 1)
 
-accuracy = np.count_nonzero(ground_truths == predicted_classes) / float(len(ground_truths))
-
-print("Model accuracy - frame by frame - state level: " + str(accuracy))
-
 # Load state list
 state_list = list(np.load(args.state_list_path))
-labels = [i for i in range(len(state_list))]# List of labels to index the confusion matrix
+labels = [i for i in range(len(state_list))] # List of labels to index the confusion matrix
+
+############ Compute accuracy on a frame by frame basis at the state level ##############
+accuracy = np.count_nonzero(ground_truths == predicted_classes) / float(len(ground_truths))
+print("Model accuracy - frame by frame - state level: " + str(accuracy))
 
 # Compute confusion matrix
 cnf_matrix = confusion_matrix(ground_truths, predicted_classes, labels = labels)
 plot_confusion_matrix(cnf_matrix, classes = state_list, normalize=True)
+plt.show()
+
+
+############## Compute accuracy on a frame by frame basis at the phoneme level ################
+phoneme_dict = {phoneme: index for (index, phoneme) in enumerate(np.load(args.phoneme_list_path))}
+
+# Convert state prediction to phonemes
+phoneme_ground_truths = [phoneme_dict[state_list[gt][:-2]] for gt in ground_truths]
+phoneme_predicted_classes = [phoneme_dict[state_list[pred][:-2]] for pred in predicted_classes]
+
+phoneme_accuracy = np.count_nonzero(phoneme_ground_truths == phoneme_predicted_classes) / float(len(phoneme_ground_truths))
+print("Model accuracy - frame by frame - state level: " + str(phoneme_accuracy))
+
+# Compute confusion matrix
+cnf_matrix = confusion_matrix(phoneme_ground_truths, phoneme_predicted_classes, labels = phoneme_dict.values())
+plot_confusion_matrix(cnf_matrix, classes = phoneme_dict.keys(), normalize=True)
 plt.show()
