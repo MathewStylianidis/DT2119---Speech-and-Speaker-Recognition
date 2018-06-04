@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
 from sklearn import preprocessing
-
+from sklearn.externals import joblib
 
 
 # Default values for CLI arguments
@@ -9,7 +9,7 @@ DEFAULT_TRAIN_PATH = "Lab3_files/d_training_data.npy"
 DEFAULT_VAL_PATH =  "Lab3_files/d_validation_data.npy"
 DEFAULT_TEST_PATH =  "Lab3_files/d_test_data.npy"
 DEFAULT_STATE_LIST_PATH = "Lab3_files/state_list.npy"
-
+DEFAULT_PREPROCESSOR_SAVE_PATH = "Lab3_files/scaler.save"
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -26,6 +26,8 @@ def get_arguments():
                         help="Test input data path.")
     parser.add_argument("--state-list-path", type=str, default = DEFAULT_STATE_LIST_PATH,
                         help="Training labels data path..")
+    parser.add_argument("--preproc-save-path", type=str, default = DEFAULT_PREPROCESSOR_SAVE_PATH,
+                        help="Path for saving the standard scaler object.")
     return parser.parse_args()
 
 args = get_arguments()
@@ -108,3 +110,6 @@ np.save("Lab3_files/X_test.npy", X_test)
 np.save("Lab3_files/y_train.npy", y_train)
 np.save("Lab3_files/y_val.npy", y_val)
 np.save("Lab3_files/y_test.npy", y_test)
+
+
+joblib.dump(scaler, args.preproc_save_path)

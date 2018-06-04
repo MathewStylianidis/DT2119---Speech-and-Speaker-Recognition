@@ -21,24 +21,15 @@ args = get_arguments()
 training_data = np.load("Lab3_files/training_data.npy")
 validation_data = np.load("Lab3_files/validation_data.npy")
 
-tr_dynamic_features = []
-val_dynamic_features = []
-
 for sample in tqdm(training_data):
-    feature_list = []
-    for idx, mfcc in enumerate(sample[args.feature_type]):
-        feature = sample[args.feature_type][idx]
-        feature_list.append(feature)
+    feature_list = [np.array(feature) for feature in sample[args.feature_type]]
     sample['features'] = np.array(feature_list)
 
 np.save("Lab3_files/d_training_data.npy", training_data)
 
 
 for sample in tqdm(validation_data):
-    feature_list = []
-    for idx, mfcc in enumerate(sample[args.feature_type]):
-        feature = sample[args.feature_type][idx]
-        feature_list.append(feature)
+    feature_list = [np.array(feature) for feature in sample[args.feature_type]]
     sample['features'] = np.array(feature_list)
 
 np.save("Lab3_files/d_validation_data.npy", validation_data)

@@ -27,16 +27,13 @@ def get_arguments():
 
 args = get_arguments()
 
-training_data = np.load(args.file_dir + args.file_name)
+data = np.load(args.file_dir + args.file_name)
 
-tr_dynamic_features = []
-val_dynamic_features = []
-
-for sample in tqdm(training_data):
+for sample in tqdm(data):
     dynamic_feature_list = []
     max_idx = len(sample[args.feature_type]) - 1
-    for idx, mfcc in enumerate(sample[args.feature_type]):
-        dynamic_feature = np.zeros((7, mfcc.shape[0]))
+    for idx, feature in enumerate(sample[args.feature_type]):
+        dynamic_feature = np.zeros((7, feature.shape[0]))
 
         dynamic_feature[0] = sample[args.feature_type][np.abs(idx - 3)]
         dynamic_feature[1] = sample[args.feature_type][np.abs(idx - 2)]
@@ -48,4 +45,4 @@ for sample in tqdm(training_data):
         dynamic_feature_list.append(dynamic_feature)
     sample['features'] = np.array(dynamic_feature_list)
 
-np.save(args.file_dir + args.save_name, training_data)
+np.save(args.file_dir + args.save_name, data)
