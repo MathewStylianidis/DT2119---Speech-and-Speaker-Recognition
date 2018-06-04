@@ -20,7 +20,6 @@ DEFAULT_PREPROCESSOR_PATH = "Lab3_files/scaler.save"
 DEFAULT_SAVED_MODEL_PATH =  "Lab3_files/my_model.h5"
 DEFAULT_STATE_LIST_PATH = "Lab3_files/state_list.npy"
 DEFAULT_HMM_MODELS_PATH= "../Lab_2/lab2_models_v2.npz"
-DEFAULT_INDEX = 0
 DEFAULT_FEATURES = 'lmfcc'
 DEFAULT_DYNAMIC = True
 
@@ -39,8 +38,6 @@ def get_arguments():
                         help="Path to preprocessor saved object.")
     parser.add_argument("--keras-model-path", type=str, default=DEFAULT_SAVED_MODEL_PATH,
                         help="Saved model path.")
-    parser.add_argument("--utterance-index", type=int, default=DEFAULT_INDEX,
-                        help="Index of utterance to be used for the predictions.")
     parser.add_argument("--state-list-path", type=str, default=DEFAULT_STATE_LIST_PATH,
                         help="Path to the npy filek with the state list")
     parser.add_argument("--hmm-models-path", type=str, default=DEFAULT_HMM_MODELS_PATH,
