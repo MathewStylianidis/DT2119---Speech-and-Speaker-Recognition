@@ -60,7 +60,7 @@ args = get_arguments()
 phoneHMMs = np.load(args.hmm_models_path)['phoneHMMs'].item()
 # Load state list
 state_list = list(np.load(args.state_list_path))
-output_dim = len(stateList)
+output_dim = len(state_list)
 
 # Extract mspec or/and lmfcc features
 samples, samplingrate = loadAudio(args.sample_path)
@@ -70,7 +70,7 @@ wordTrans = list(path2info(args.sample_path)[2])
 phoneTrans = words2phones(wordTrans, prondict, addSilence=True, addShortPause=False)
 targets = forcedAlignment(lmfcc, phoneHMMs, phoneTrans, state_list, addShortPause=False)
 target_indices = np.array([state_list.index(target) for target in targets])
-sample = {'filename': filename, 'lmfcc': lmfcc,
+sample = {'filename': args.sample_path, 'lmfcc': lmfcc,
                   'mspec': mspec, 'targets': target_indices}
 
 
@@ -88,7 +88,7 @@ if args.dynamic is True:
         dynamic_feature[4] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 1))]
         dynamic_feature[5] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 2))]
         dynamic_feature[6] = sample[args.feature_type][max_idx - np.abs(max_idx - (idx + 3))]
-        dynamic_feature_list.append(dynamic_feature)
+        dynamic_feature_list.append(dynamic_feature.flatten())
     sample['features'] = np.array(dynamic_feature_list)
 else:
     feature_list = [np.array(feature) for feature in sample[args.feature_type]]
@@ -100,6 +100,7 @@ scaler = joblib.load(args.preproc_path)
 X = scaler.transform(sample['features'])
 y = np_utils.to_categorical(sample['targets'], output_dim)
 
+
 # Load neural network model trained in keras
 model = load_model(args.keras_model_path)
 
@@ -107,3 +108,12 @@ model = load_model(args.keras_model_path)
 predictions = model.predict(X)
 
 # Plot results
+plt.title("Posterior")
+plt.pcolormesh(predictions.T)
+plt.colorbar()
+plt.show()
+
+plt.title("Ground truth")
+plt.pcolormesh(y.T)
+plt.colorbar()
+plt.show()
