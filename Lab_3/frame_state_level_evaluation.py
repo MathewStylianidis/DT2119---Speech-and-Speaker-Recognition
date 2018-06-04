@@ -4,6 +4,8 @@ on the state level frame by frame.
 """
 import argparse
 import numpy as np
+import itertools
+import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from prondict import prondict
 from keras.utils import np_utils
@@ -17,6 +19,7 @@ DEFAULT_TEST_OUTPUTS_PATH = "Lab3_files/y_test.npy"
 DEFAULT_SAVED_MODEL_PATH =  "Lab3_files/my_model.h5"
 DEFAULT_STATE_LIST_PATH = "Lab3_files/state_list.npy"
 DEFAULT_PHONEME_LIST_PATH = "Lab3_files/phoneme_list.npy"
+DEFAULT_FEATURES = "lmfcc"
 DEFAULT_DYNAMIC = True
 
 def get_arguments():
@@ -40,10 +43,11 @@ def get_arguments():
                         help="Path to the npy file with the phoneme list")
     return parser.parse_args()
 
+
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.viridis):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -62,24 +66,21 @@ def plot_confusion_matrix(cm, classes,
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
-
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
-
 args = get_arguments()
+
+# Load state list
+state_list = list(np.load(args.state_list_path))
+labels = [i for i in range(len(state_list))] # List of labels to index the confusion matrix
+output_dim = len(state_list)
 
 # Load test dataset
 X_test = np.load(args.test_inputs_path)
 y_test = np.load(args.test_outputs_path)
+y_test = np_utils.to_categorical(y_test, output_dim)
 
 # Load neural network model trained in keras
 model = load_model(args.keras_model_path)
@@ -90,10 +91,6 @@ predictions = model.predict(X_test)
 # Use argmax to get the predicted class index
 ground_truths = np.argmax(y_test, axis = 1)
 predicted_classes = np.argmax(predictions, axis = 1)
-
-# Load state list
-state_list = list(np.load(args.state_list_path))
-labels = [i for i in range(len(state_list))] # List of labels to index the confusion matrix
 
 ############ Compute accuracy on a frame by frame basis at the state level ##############
 accuracy = np.count_nonzero(ground_truths == predicted_classes) / float(len(ground_truths))
@@ -109,13 +106,13 @@ plt.show()
 phoneme_dict = {phoneme: index for (index, phoneme) in enumerate(np.load(args.phoneme_list_path))}
 
 # Convert state prediction to phonemes
-phoneme_ground_truths = [phoneme_dict[state_list[gt][:-2]] for gt in ground_truths]
-phoneme_predicted_classes = [phoneme_dict[state_list[pred][:-2]] for pred in predicted_classes]
+phoneme_ground_truths = np.array([phoneme_dict[state_list[gt][:-2]] for gt in ground_truths])
+phoneme_predicted_classes = np.array([phoneme_dict[state_list[pred][:-2]] for pred in predicted_classes])
 
 phoneme_accuracy = np.count_nonzero(phoneme_ground_truths == phoneme_predicted_classes) / float(len(phoneme_ground_truths))
-print("Model accuracy - frame by frame - state level: " + str(phoneme_accuracy))
+print("Model accuracy - frame by frame - phoneme level: " + str(phoneme_accuracy))
 
 # Compute confusion matrix
-cnf_matrix = confusion_matrix(phoneme_ground_truths, phoneme_predicted_classes, labels = phoneme_dict.values())
-plot_confusion_matrix(cnf_matrix, classes = phoneme_dict.keys(), normalize=True)
+cnf_matrix = confusion_matrix(phoneme_ground_truths, phoneme_predicted_classes, labels = list(phoneme_dict.values()))
+plot_confusion_matrix(cnf_matrix, classes = list(phoneme_dict.keys()), normalize=True)
 plt.show()
