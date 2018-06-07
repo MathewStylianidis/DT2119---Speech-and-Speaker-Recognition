@@ -6,6 +6,7 @@ import argparse
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
+from Levenshtein import distance
 from sklearn.metrics import confusion_matrix
 from prondict import prondict
 from keras.utils import np_utils
@@ -70,12 +71,29 @@ def plot_confusion_matrix(cm, classes,
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
+def levenshteinDistance(s1, s2):
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]
+
 args = get_arguments()
 
 # Load state list
 state_list = list(np.load(args.state_list_path))
 labels = [i for i in range(len(state_list))] # List of labels to index the confusion matrix
 output_dim = len(state_list)
+
+
 
 # Load test dataset
 X_test = np.load(args.test_inputs_path)
@@ -102,6 +120,10 @@ plot_confusion_matrix(cnf_matrix, classes = state_list, normalize=True)
 plt.show()
 
 
+
+
+
+
 ############## Compute accuracy on a frame by frame basis at the phoneme level ################
 phoneme_dict = {phoneme: index for (index, phoneme) in enumerate(np.load(args.phoneme_list_path))}
 
@@ -116,3 +138,42 @@ print("Model accuracy - frame by frame - phoneme level: " + str(phoneme_accuracy
 cnf_matrix = confusion_matrix(phoneme_ground_truths, phoneme_predicted_classes, labels = list(phoneme_dict.values()))
 plot_confusion_matrix(cnf_matrix, classes = list(phoneme_dict.keys()), normalize=True)
 plt.show()
+
+
+
+
+
+########## Compute accuracy on a frame by frame basis at the state level, merging adjacent identical states ###########
+# Merge adjacent identical states
+gt_transcription = [ground_truths[0]]
+for i in range(1, len(ground_truths)):
+    if ground_truths[i] != gt_transcription[-1]:
+        gt_transcription.append(ground_truths[i])
+predicted_transcription = [predicted_classes[0]]
+for i in range(1, len(predicted_classes)):
+    if predicted_classes[i] != predicted_transcription[-1]:
+        predicted_transcription.append(predicted_classes[i])
+
+gt_transcription = ''.join(str(x) for x in gt_transcription)
+predicted_transcription = ''.join(str(x) for x in predicted_transcription)
+
+edit_distance = distance(gt_transcription, predicted_transcription) / max(len(gt_transcription), len(predicted_transcription))
+print("Edit distance - state level: " + str(edit_distance))
+
+########## Compute accuracy on a frame by frame basis at the phoneme level, merging adjacent identical states ###########
+# Merge adjacent identical states
+gt_phon_transcription = [phoneme_ground_truths[0]]
+for i in range(1, len(phoneme_ground_truths)):
+    if phoneme_ground_truths[i] != gt_phon_transcription[-1]:
+        gt_phon_transcription.append(phoneme_ground_truths[i])
+
+predicted_phon_transcription = [phoneme_predicted_classes[0]]
+for i in range(1, len(phoneme_predicted_classes)):
+    if phoneme_predicted_classes[i] != predicted_phon_transcription[-1]:
+        predicted_phon_transcription.append(phoneme_predicted_classes[i])
+
+gt_phon_transcription = ''.join(str(x) for x in gt_phon_transcription)
+predicted_phon_transcription = ''.join(str(x) for x in predicted_phon_transcription)
+
+edit_distance_phon = distance(gt_phon_transcription, predicted_phon_transcription) / max(len(gt_phon_transcription), len(predicted_phon_transcription))
+print("Edit distance - phoneme level: " + str(edit_distance_phon))
